@@ -1,13 +1,16 @@
-var createError = require('http-errors')
-var express = require('express')
-var path = require('path')
-var cookieParser = require('cookie-parser')
-var logger = require('morgan')
-let cors = require('cors')
-const session = require('express-session')
-
-var indexRouter = require('./src/routes/index')
-var usersRouter = require('./src/routes/users')
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const logger = require('morgan')
+const indexRouter = require('./src/routes/index')
+const usersRouter = require('./src/routes/users')
+const uploadRouter = require('./src/routes/upload')
+const TecType = require('./src/routes/technology/type')
+const {checkLogin} = require("./src/middleware/checkLogin")
+const {setHeader} = require("./src/middleware/setHeader")
+const {setSession} = require("./src/middleware/session")
+const {getNotFound} = require("./src/middleware/404")
+const {errorHandle} = require("./src/middleware/errorHandle")
 
 var app = express()
 
@@ -15,65 +18,23 @@ var app = express()
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'pug'
 )
+
+app.use(express.static('statics'))
 app.use(logger('dev'))
 app.use(express.json())
 app.use(express.urlencoded({extended: false}))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(session({
-  secret: '123456',
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24,
-    httpOnly: true
-  }
-}))
-
-app.use((req, res, next) => {
-  res.set({
-    'Access-Control-Allow-Credentials': true,
-    'Access-Control-Allow-Origin': req.headers.origin || '*',
-    'Access-Control-Allow-Headers': 'X-Requested-With,Content-Type,Access-Control-Allow-Origin',
-    'Access-Control-Allow-Methods': 'PUT,POST,GET,DELETE,OPTIONS',
-    'Content-Type': 'application/json; charset=utf-8'
-  })
-  req.method === 'OPTIONS' ? res.status(204).end() : next()
-})
-
-
+app.use(setSession())
+app.use(setHeader) // 登录相关的不需要验证是否登录
 app.use('/users', usersRouter)
-// 拦截所有的请求
-app.use(function (req, res, next) {
-  const data = {
-    code: -1,
-    msg: '未登录',
-    data: null
-  }
-  if (req.session[ 'userName' ]) {
-    req.cookies[ 'userName' ] === req.session[ 'userName' ] ? next() : res.send(data)
-  } else {
-    res.send(data)
-  }
-
-})
-
+app.use('/', uploadRouter)
+app.use('/', TecType)
+//app.use(checkLogin)
 app.use('/', indexRouter)
-
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
-  next(createError(404))
-})
-
+app.use(getNotFound)
 // error handler
-app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message
-  res.locals.error = req.app.get('env') === 'development' ? err : {}
-
-  // render the error page
-  res.status(err.status || 500)
-  res.render('error')
-})
+app.use(errorHandle)
 
 module.exports = app
