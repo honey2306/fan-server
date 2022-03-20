@@ -1,54 +1,36 @@
 const express = require('express');
 const router = express.Router();
-const { TecType } = require('../../model/TecType')
+const {TecType} = require('../../model/technology/TecType')
 const initData = require('../../utils/returnData')
+const {judgeParam, to, del, add, edit} = require("../../utils/tools");
 
 router.get('/type/list', async (req, res) => {
+  const query = req.query
+  const returnData = {...initData}
+  const result = await TecType.find({}, {
+    _id: 1,
+    type: 1
+  }).sort({'_id': -1}).skip((query.page - 1) * query.pageSize).limit(query.pageSize || 10)
+  const total = await TecType.count()
+  returnData.data = {
+    data: result,
+    total: total
+  }
   res.send(returnData)
 })
 
 router.post('/type/add', async (req, res) => {
   const returnData = {...initData}
-  const { type } = req.body
-  if (type) {
-    TecType.create({
-      type,
-    }, {unique: true},(err, ret) => {
-      if (err) {
-        console.log(err)
-        returnData.code = -2
-        returnData.msg = '创建失败'
-      }
-      res.send(returnData)
-    })
-  } else {
-    returnData.code = -2
-    returnData.msg = '参数不对'
-    res.send(returnData)
-  }
+  add(req, res, TecType, {type: req.body.type}, 'type')
 })
 
-router.post('/type/edit', (req, res, next) => {
-  const returnData = initData
-  const newType = new Counter({
-    _id: 'type',
-    type: 1
-  })
-  newType.save((err, ret) => {
-    if (err) {
-      returnData.code = -2
-      returnData.msg = '创建失败'
-    }
-    res.send(returnData)
-  })
+router.put('/type/edit', (req, res, next) => {
+  edit(req, res, TecType, {type: req.body.type}, '_id', 'type')
 })
 
-router.put('/type/del', (req, res, next) => {
-  const returnData = {...initData}
-  req.session.isLogin = null
-  res.send(returnData)
+router.post('/type/del', (req, res, next) => {
+  del(req, res, '_id', TecType)
 })
-
 
 
 module.exports = router;
