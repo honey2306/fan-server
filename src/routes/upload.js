@@ -9,7 +9,7 @@ const { writeFileByUser, deleteAll } = require('../utils/tools')
 
 let upload = multer({dest: 'uploads/'})
 router.post('/upload', upload.single('img'), ((req, res) => {
-  const initData = returnData
+  const initData = {...returnData}
   const nowDate = momemt().format('YYYY-MM-DD')
   fs.readFile(req.file.path, (err, data) => {
     if (err) {

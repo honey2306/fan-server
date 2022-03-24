@@ -36,11 +36,10 @@ const deleteAll = (path) => {
         fs.unlinkSync(curPath)
       }
     })
-    fs.rmdirSync(path)
   }
 }
 
-const judgeParam = (obj, res, ...param) => {
+const judgeParam = (obj, res, param) => {
   const returnData = {...initData}
   let flag = true
   param.forEach((item) => {
@@ -72,7 +71,7 @@ const to = (promise) => {
 
 const del = async (req, res, key, dbSchema) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, key)) {
+  if (judgeParam(req, res, [key])) {
     const value = req.body[key]
     const {err, data} = await to(dbSchema.findOne({key: value}))
     if (err || data === null) {
@@ -80,7 +79,6 @@ const del = async (req, res, key, dbSchema) => {
       returnData.msg = '没有找到该类型'
       res.send(returnData)
     } else {
-      console.log(value)
       const {err} = await to(dbSchema.findByIdAndDelete(value))
       if (err) {
         returnData.code = -2
@@ -92,10 +90,10 @@ const del = async (req, res, key, dbSchema) => {
 }
 
 
-const edit = async (req, res, dbSchema, unique, ...param) => {
+const edit = async (req, res, dbSchema, unique, param) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, ...param)) {
-    const {data, err} = await to(dbSchema.find({}).or(unique))
+  if (judgeParam(req, res, param)) {
+    const {data, err} = await to(dbSchema.find({_id: { $ne: req.body._id}}).or(unique))
     if (data.length > 0 || err) {
       returnData.code = -2
       returnData.msg = '重复创建'
@@ -110,20 +108,24 @@ const edit = async (req, res, dbSchema, unique, ...param) => {
           obj[item] = req.body[item]
         }
       })
-      const {err} = await to(dbSchema.findByIdAndUpdate(id, obj))
+      console.log(id, obj)
+      const {err, data} = await to(dbSchema.findByIdAndUpdate(id, obj))
       if (err) {
         console.log(err)
-        returnData.code = -2
         returnData.msg = '修改失败'
+      } else {
+        returnData.data = {
+          _id: data._id
+        }
       }
       res.send(returnData)
     }
   }
 }
 
-const add = async (req, res, dbSchema, unique, ...param) => {
+const add = async (req, res, dbSchema, unique, param) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, ...param)) {
+  if (judgeParam(req, res, param)) {
     const {data, err} = await to(dbSchema.find({}).or(unique))
     if (data.length > 0 || err) { // 存在相同属性的值或者查找出错
       returnData.code = -2
@@ -134,10 +136,14 @@ const add = async (req, res, dbSchema, unique, ...param) => {
       param.forEach((item) => {
         obj[item] = req.body[item]
       })
-      const {err} = await to(dbSchema.create(obj))
+      const {err, data} = await to(dbSchema.create(obj))
       if (err) {
         returnData.code = -2
         returnData.msg = '创建失败'
+      } else {
+        returnData.data = {
+          _id: data._id
+        }
       }
       res.send(returnData)
     }

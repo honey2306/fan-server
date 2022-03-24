@@ -21,11 +21,11 @@ router.get('/type/list', async (req, res) => {
 
 router.post('/type/add', async (req, res) => {
   const returnData = {...initData}
-  add(req, res, TecType, {type: req.body.type}, 'type')
+  add(req, res, TecType, {type: req.body.type}, ['type'])
 })
 
 router.put('/type/edit', (req, res, next) => {
-  edit(req, res, TecType, {type: req.body.type}, '_id', 'type')
+  edit(req, res, TecType, {type: req.body.type}, ['_id', 'type'])
 })
 
 router.post('/type/del', (req, res, next) => {
