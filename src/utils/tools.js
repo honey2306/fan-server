@@ -43,10 +43,10 @@ const judgeParam = (obj, res, param) => {
   const returnData = {...initData}
   let flag = true
   param.forEach((item) => {
-    if (!Object.prototype.hasOwnProperty.call(obj.body, item)) {
+    if (!Object.prototype.hasOwnProperty.call(obj, item)) {
       flag = false
       returnData.code = -2
-      returnData.msg = '参数错误'
+      returnData.msg = `参数错误--${item}`
     }
   })
   !flag && res.send(returnData)
@@ -71,7 +71,7 @@ const to = (promise) => {
 
 const del = async (req, res, key, dbSchema) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, [key])) {
+  if (judgeParam(req.body, res, [key])) {
     const value = req.body[key]
     const {err, data} = await to(dbSchema.findOne({key: value}))
     if (err || data === null) {
@@ -92,8 +92,8 @@ const del = async (req, res, key, dbSchema) => {
 
 const edit = async (req, res, dbSchema, unique, param) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, param)) {
-    const {data, err} = await to(dbSchema.find({_id: { $ne: req.body._id}}).or(unique))
+  if (judgeParam(req.body, res, param)) {
+    const {data, err} = await to(dbSchema.find({_id: {$ne: req.body._id}}).or(unique))
     if (data.length > 0 || err) {
       returnData.code = -2
       returnData.msg = '重复创建'
@@ -125,7 +125,7 @@ const edit = async (req, res, dbSchema, unique, param) => {
 
 const add = async (req, res, dbSchema, unique, param) => {
   const returnData = {...initData}
-  if (judgeParam(req, res, param)) {
+  if (judgeParam(req.body, res, param)) {
     const {data, err} = await to(dbSchema.find({}).or(unique))
     if (data.length > 0 || err) { // 存在相同属性的值或者查找出错
       returnData.code = -2

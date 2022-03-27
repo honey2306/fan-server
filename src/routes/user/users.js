@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../model/User')
-const initData = require('../utils/returnData')
+const User = require('../../model/user/User')
+const initData = require('../../utils/returnData')
 
 router.get('/loginInfo', async (req, res) => {
   const returnData = {...initData}
