@@ -5,6 +5,7 @@ const TecType = require("../routes/technology/type")
 const technologyRouter = require("../routes/technology")
 const map = require("../routes/utils/mapAPI")
 const Travel = require("../routes/travel/travel")
+const dalyPic = require("../routes/home/dailyPic")
 const {checkLogin} = require("./checkLogin")
 
 module.exports.useRouter = (app) => {
@@ -16,4 +17,5 @@ module.exports.useRouter = (app) => {
   app.use('/', footPrint)
   app.use('/', map)
   app.use('/', Travel)
+  app.use('/', dalyPic)
 }
