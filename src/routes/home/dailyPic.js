@@ -7,18 +7,17 @@ const {response} = require("express");
 router.get('/home/dailyPic', async (req, res) => {
   const returnData = {...initData}
   request({
-    url: 'https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1',
+    url: 'https://apier.youngam.cn/essay/one',
     method: 'get',
     headers: {
       'Content-Type': 'text/json'
     }
   }, (err, response, body) => {
     if (!err && response.statusCode === 200) {
-      const imgData = JSON.parse(body).images[0]
+      const data = JSON.parse(body).dataList
+      const index = Math.floor(Math.random() * data.length)
       returnData.data = {
-        url: 'https://www.bing.com/' + imgData.url,
-        title: imgData.title,
-        content: imgData.copyright.split('(')[0]
+        ...data[index]
       }
     } else {
       returnData.code = -2
