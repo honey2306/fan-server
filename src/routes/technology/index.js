@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { Blog } = require('../../model/technology/Blog')
+const {Blog} = require('../../model/technology/Blog')
 const initData = require('../../utils/returnData')
-const { del, add, edit} = require("../../utils/tools");
+const {del, add, edit} = require("../../utils/tools");
 
 router.get('/technology/list', async (req, res) => {
   const query = req.query
@@ -18,11 +18,11 @@ router.get('/technology/list', async (req, res) => {
 
 router.post('/technology/add', async (req, res) => {
   req.body.author = req.session.name || '吴凡'
-  add(req, res, Blog, {title: req.body.title}, ['title', 'img', 'typeId', 'content', 'status', 'author'])
+  add(req, res, Blog, {title: req.body.title}, ['title', 'img', 'typeId', 'content', 'status', 'author', 'desc'])
 })
 
 router.put('/technology/edit', (req, res, next) => {
-  edit(req, res, Blog, {title: req.body.title}, ['_id', 'title', 'img', 'typeId', 'content', 'status'])
+  edit(req, res, Blog, {title: req.body.title}, ['_id', 'title', 'img', 'typeId', 'content', 'status', 'desc'])
 })
 
 router.post('/technology/del', (req, res, next) => {

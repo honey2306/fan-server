@@ -108,7 +108,6 @@ const edit = async (req, res, dbSchema, unique, param) => {
           obj[item] = req.body[item]
         }
       })
-      console.log(id, obj)
       const {err, data} = await to(dbSchema.findByIdAndUpdate(id, obj))
       if (err) {
         console.log(err)
